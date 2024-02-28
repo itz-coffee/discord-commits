@@ -13988,7 +13988,7 @@ function generateText(commit) {
         text += `\`${id}\` ${obfuscate(message.substring(1).trim())}`;
     }
     else {
-        text += `[\`${id}\`] (<${repo}/commit/${id}>) ${message}`;
+        text += `[\`${id}\`](<${repo}/commit/${id}>) ${message}`;
     }
     text += "\n";
     return [text, isPrivate];
