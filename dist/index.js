@@ -13912,7 +13912,7 @@ const branchUrl = `${repoUrl}/tree/${branch}`;
 const originalFooter = `[${repo}](<${repoUrl}>)/[${branch}](<${branchUrl}>)`;
 // const privateFooter = `${obfuscate(repo)}/${obfuscate(branch)}`
 let isPrivate = false;
-const footer = () => `- [${sender}](${senderUrl}) on ${originalFooter}`;
+const footer = () => `- [${sender}](<${senderUrl}>) on ${originalFooter}`;
 // const footer = () =>
 // 	`- [${sender}](<${senderUrl}>) on ${
 // 		isPrivate ? privateFooter : originalFooter
