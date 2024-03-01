@@ -7,23 +7,24 @@ import { generateText, obfuscate } from "./utils"
 const url = core.getInput("webhookUrl").replace("/github", "")
 const data = context.payload as PushEvent
 
-const [sender, repo, branch, senderUrl, repoUrl, branchUrl] = [
+const [sender, repo, branch, senderUrl, repoUrl] = [
 	data.sender.login,
 	data.repository.name,
 	context.ref.replace("refs/heads/", ""),
 	data.sender.html_url,
-	data.repository.html_url,
-	`${repoUrl}/tree/${branch}`
+	data.repository.html_url
 ]
+const branchUrl = `${repoUrl}/tree/${branch}`
 
 const originalFooter = `[${repo}](<${repoUrl}>)/[${branch}](<${branchUrl}>)`
-const privateFooter = `${obfuscate(repo)}/${obfuscate(branch)}`
+// const privateFooter = `${obfuscate(repo)}/${obfuscate(branch)}`
 
 let isPrivate = false
-const footer = () =>
-	`- [${sender}](<${senderUrl}>) on ${
-		isPrivate ? privateFooter : originalFooter
-	}`
+const footer = () => `- [${sender}](${senderUrl}) on ${originalFooter}`
+// const footer = () =>
+// 	`- [${sender}](<${senderUrl}>) on ${
+// 		isPrivate ? privateFooter : originalFooter
+// 	}`
 
 let buffer = String()
 
@@ -49,15 +50,16 @@ async function run(): Promise<void> {
 	if (context.eventName !== "push") return
 
 	for (const commit of data.commits) {
-		const [text, _private] = generateText(commit)
+		// const [text, _private] = generateText(commit)
+		const text = generateText(commit)
 
-		if (_private) isPrivate = true
+		// if (_private) isPrivate = true
 
 		const sendLength = text.length + buffer.length + footer().length
 
 		if (sendLength >= 2000) {
 			await send()
-			isPrivate = false
+			// isPrivate = false
 		}
 
 		buffer += text

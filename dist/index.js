@@ -13901,16 +13901,22 @@ const node_fetch_1 = __importDefault(__nccwpck_require__(4429));
 const utils_1 = __nccwpck_require__(1314);
 const url = core.getInput("webhookUrl").replace("/github", "");
 const data = github_1.context.payload;
-const sender = data.sender.login;
-const repo = data.repository.name;
-const branch = github_1.context.ref.replace("refs/heads/", "");
-const senderUrl = data.sender.html_url;
-const repoUrl = data.repository.html_url;
+const [sender, repo, branch, senderUrl, repoUrl] = [
+    data.sender.login,
+    data.repository.name,
+    github_1.context.ref.replace("refs/heads/", ""),
+    data.sender.html_url,
+    data.repository.html_url
+];
 const branchUrl = `${repoUrl}/tree/${branch}`;
 const originalFooter = `[${repo}](<${repoUrl}>)/[${branch}](<${branchUrl}>)`;
-const privateFooter = `${(0, utils_1.obfuscate)(repo)}/${(0, utils_1.obfuscate)(branch)}`;
+// const privateFooter = `${obfuscate(repo)}/${obfuscate(branch)}`
 let isPrivate = false;
-const footer = () => `- [${sender}](<${senderUrl}>) on ${isPrivate ? privateFooter : originalFooter}`;
+const footer = () => `- [${sender}](${senderUrl}) on ${originalFooter}`;
+// const footer = () =>
+// 	`- [${sender}](<${senderUrl}>) on ${
+// 		isPrivate ? privateFooter : originalFooter
+// 	}`
 let buffer = String();
 function send() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -13935,13 +13941,13 @@ function run() {
         if (github_1.context.eventName !== "push")
             return;
         for (const commit of data.commits) {
-            const [text, _private] = (0, utils_1.generateText)(commit);
-            if (_private)
-                isPrivate = true;
+            // const [text, _private] = generateText(commit)
+            const text = (0, utils_1.generateText)(commit);
+            // if (_private) isPrivate = true
             const sendLength = text.length + buffer.length + footer().length;
             if (sendLength >= 2000) {
                 yield send();
-                isPrivate = false;
+                // isPrivate = false
             }
             buffer += text;
         }
@@ -13964,15 +13970,12 @@ exports.generateText = exports.obfuscate = void 0;
 const blocks = ["▂", "▄", "▆", "█"];
 function obfuscate(input) {
     let output = String();
-    for (let i = 0; i < input.length; i++) {
-        const char = input.charAt(i);
-        if (char.match(/\S+/)) {
-            const rand = Math.random() * blocks.length;
-            output += blocks[Math.trunc(rand)];
+    for (const char of input) {
+        if (char === " ") {
+            output += " ";
+            continue;
         }
-        else {
-            output += char;
-        }
+        output += blocks[Math.floor(Math.random() * blocks.length)];
     }
     return output;
 }
@@ -13980,18 +13983,19 @@ exports.obfuscate = obfuscate;
 function generateText(commit) {
     const id = commit.id.substring(0, 8);
     const repo = commit.url.split("/commit")[0];
-    let text = String();
+    let text = `[\`${id}\`](<${repo}/commit/${id}>) `;
     let message = commit.message;
-    let isPrivate = false;
+    // let isPrivate = false
     if (message.startsWith("!") || message.startsWith("$")) {
-        isPrivate = true;
-        text += `\`${id}\` ${obfuscate(message.substring(1).trim())}`;
+        // isPrivate = true
+        text += `${obfuscate(message.substring(1).trim())}`;
     }
     else {
-        text += `[\`${id}\`](<${repo}/commit/${id}>) ${message}`;
+        text += `${message}`;
     }
     text += "\n";
-    return [text, isPrivate];
+    // return [text, isPrivate]
+    return text;
 }
 exports.generateText = generateText;
 

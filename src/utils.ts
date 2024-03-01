@@ -5,35 +5,34 @@ const blocks = ["▂", "▄", "▆", "█"]
 export function obfuscate(input: string): string {
 	let output = String()
 
-	for (let i = 0; i < input.length; i++) {
-		const char = input.charAt(i)
-
-		if (char.match(/\S+/)) {
-			const rand = Math.random() * blocks.length
-			output += blocks[Math.trunc(rand)]
-		} else {
-			output += char
+	for (const char of input) {
+		if (char === " ") {
+			output += " "
+			continue
 		}
+
+		output += blocks[Math.floor(Math.random() * blocks.length)]
 	}
 
 	return output
 }
 
-export function generateText(commit: Commit): [string, boolean] {
+export function generateText(commit: Commit): string {
 	const id = commit.id.substring(0, 8)
 	const repo = commit.url.split("/commit")[0]
 
-	let text = String()
+	let text = `[\`${id}\`](<${repo}/commit/${id}>) `
 	let message = commit.message
-	let isPrivate = false
+	// let isPrivate = false
 
 	if (message.startsWith("!") || message.startsWith("$")) {
-        isPrivate = true
-        text += `\`${id}\` ${obfuscate(message.substring(1).trim())}`
+        // isPrivate = true
+        text += `${obfuscate(message.substring(1).trim())}`
     } else {
-        text += `[\`${id}\`](<${repo}/commit/${id}>) ${message}`
+        text += `${message}`
     }
 
 	text += "\n"
-	return [text, isPrivate]
+	// return [text, isPrivate]
+	return text
 }
