@@ -45,16 +45,11 @@ async function run(): Promise<void> {
 	if (context.eventName !== "push") return
 
 	for (let commit of data.commits) {
-		// let [text, _private] = generateText(commit)
 		let text = generateText(commit)
-
-		// if (_private) isPrivate = true
-
 		let sendLength = text.length + buffer.length + footer.length
 
 		if (sendLength >= 2000) {
 			await send()
-			// isPrivate = false
 		}
 
 		buffer += text
